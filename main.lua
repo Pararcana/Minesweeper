@@ -22,8 +22,8 @@ end
 
 
 local function verify(dt)
+    print(#verifyArr)
     dtotal = dtotal + dt
-    --print(dtotal)
     if #verifyArr == 0 and #bombSquares ~= 0 then
         sfx["win"]:play()
         level = level + 1
@@ -35,12 +35,41 @@ local function verify(dt)
             db = true
         end
         if dtotal > startSecs + 3 then
+            verifyArr = {}
             deaths = deaths + 1
             reset()
             gameOver = false
             db = false
         end
     end
+end
+
+
+local function setup()
+    local count = 1
+    math.randomseed(os.time())
+    while count ~= bombAmount + 1 do
+        num1, num2 = math.random(1, boardSize), math.random(1, boardSize)
+        if not (num1 == rank and num2 == file) and not isDuplicate(bombSquares, rank, file) and not isDuplicate(bombSquares, num1, num2) then
+            table.insert(bombSquares, {num1, num2})
+            count = count + 1
+        end
+    end
+    for i = 1, boardSize do for j = 1, boardSize do
+        if not isDuplicate(bombSquares, i, j) then
+            table.insert(verifyArr, {i,j})
+        end end
+    end
+    for v = 1, #bombSquares do for i = -1, 1, 1 do for j = -1, 1, 1 do
+        if (i ~= 0 or j ~= 0) and math.max(bombSquares[v][1] + i, bombSquares[v][2] + j) <= boardSize and math.min(bombSquares[v][1] + i, bombSquares[v][2] + j) > 0 and not isDuplicate(bombSquares, bombSquares[v][1] + i, bombSquares[v][2] + j) then
+            if isDuplicate(numSquares, bombSquares[v][1] + i,bombSquares[v][2] + j) and #numSquares ~= 0 then 
+                local w = isDuplicate(numSquares, bombSquares[v][1] + i,bombSquares[v][2] + j, true)
+                numSquares[w][3] = numSquares[w][3] + 1
+            else
+                table.insert(numSquares, {bombSquares[v][1] + i, bombSquares[v][2] + j, 1})
+            end
+        end
+    end end end
 end
 
 
@@ -80,30 +109,7 @@ local function click(x, y, button)
             local arr1 = button == 1 and clickedSquares or flagSquares
             local arr2 = button ~= 1 and clickedSquares or flagSquares
             if #clickedSquares == 0 and button == 1 and not isDuplicate(flagSquares, rank, file) then
-                local count = 1
-                math.randomseed(os.time())
-                while count ~= bombAmount + 1 do
-                    num1, num2 = math.random(1, boardSize), math.random(1, boardSize)
-                    if not (num1 == rank and num2 == file) and not isDuplicate(bombSquares, rank, file) and not isDuplicate(bombSquares, num1, num2) then
-                        table.insert(bombSquares, {num1, num2})
-                        count = count + 1
-                    end
-                end
-                for i = 1, boardSize do for j = 1, boardSize do
-                    if not isDuplicate(bombSquares, i, j) then
-                        table.insert(verifyArr, {i,j})
-                    end end
-                end
-                for v = 1, #bombSquares do for i = -1, 1, 1 do for j = -1, 1, 1 do
-                    if (i ~= 0 or j ~= 0) and math.max(bombSquares[v][1] + i, bombSquares[v][2] + j) <= boardSize and math.min(bombSquares[v][1] + i, bombSquares[v][2] + j) > 0 and not isDuplicate(bombSquares, bombSquares[v][1] + i, bombSquares[v][2] + j) then
-                        if isDuplicate(numSquares, bombSquares[v][1] + i,bombSquares[v][2] + j) and #numSquares ~= 0 then 
-                            local w = isDuplicate(numSquares, bombSquares[v][1] + i,bombSquares[v][2] + j, true)
-                            numSquares[w][3] = numSquares[w][3] + 1
-                        else
-                            table.insert(numSquares, {bombSquares[v][1] + i, bombSquares[v][2] + j, 1})
-                        end
-                    end
-                end end end
+                setup()
             end
             if (not isDuplicate(arr1, rank, file) or button == 1) and not isDuplicate(arr2, rank, file) then
                 if isDuplicate(bombSquares, rank, file) and button == 1 then
@@ -111,23 +117,23 @@ local function click(x, y, button)
                     gameOver = true
                 else
                     if isDuplicate(verifyArr, rank, file) and not isDuplicate(numSquares, rank, file) and button == 1 then
+                        table.insert(clickedSquares, {rank,file})
+                        table.remove(verifyArr, isDuplicate(verifyArr, rank, file, true))
                         sfx["blip"]:play()
                         local nilSquares = {{rank, file}}
                         while #nilSquares ~= 0 do
-                            for i = -1, 1, 1 do 
-                                for j = -1, 1, 1 do
-                                    if i ~= 0 or j ~= 0 and math.max(nilSquares[1][1] + i, nilSquares[1][2] + j) <= boardSize and math.min(nilSquares[1][1] + i, nilSquares[1][2] + j) > 0 then
-                                        if isDuplicate(verifyArr, nilSquares[1][1] + i, nilSquares[1][2] + j) and not isDuplicate(flagSquares, nilSquares[1][1] + i, nilSquares[1][2] + j) and not isDuplicate(numSquares, nilSquares[1][1] + i, nilSquares[1][2] + j)then
-                                            table.insert(nilSquares, {nilSquares[1][1] + i, nilSquares[1][2] + j})
-                                        end
-                                        table.insert(clickedSquares, {nilSquares[1][1] + i, nilSquares[1][2] + j})
-                                        local index = isDuplicate(verifyArr, nilSquares[1][1] + i, nilSquares[1][2] + j, true)
-                                        if type(index) == "number" then
-                                            table.remove(verifyArr, index)
-                                        end
+                            for i = -1, 1, 1 do for j = -1, 1, 1 do
+                                if i ~= 0 or j ~= 0 and math.max(nilSquares[1][1] + i, nilSquares[1][2] + j) <= boardSize and math.min(nilSquares[1][1] + i, nilSquares[1][2] + j) > 0 then
+                                    if isDuplicate(verifyArr, nilSquares[1][1] + i, nilSquares[1][2] + j) and not isDuplicate(flagSquares, nilSquares[1][1] + i, nilSquares[1][2] + j) and not isDuplicate(numSquares, nilSquares[1][1] + i, nilSquares[1][2] + j)then
+                                        table.insert(nilSquares, {nilSquares[1][1] + i, nilSquares[1][2] + j})
+                                    end
+                                    table.insert(clickedSquares, {nilSquares[1][1] + i, nilSquares[1][2] + j})
+                                    local index = isDuplicate(verifyArr, nilSquares[1][1] + i, nilSquares[1][2] + j, true)
+                                    if type(index) == "number" then
+                                        table.remove(verifyArr, index)
                                     end
                                 end
-                            end 
+                            end end 
                             table.remove(nilSquares, 1)
                         end 
                     else 
