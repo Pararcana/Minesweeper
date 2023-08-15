@@ -22,7 +22,6 @@ end
 
 
 local function verify(dt)
-    print(#verifyArr)
     dtotal = dtotal + dt
     if #verifyArr == 0 and #bombSquares ~= 0 then
         sfx["win"]:play()
