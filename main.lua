@@ -14,7 +14,7 @@ end
 
 local function reset()
     clickedSquares,flagSquares,bombSquares, numSquares = {}, {}, {}, {}
-    if boardSize*2 < (5*math.log(level)) then -- magic formula
+    if boardSize*2 < (10*math.log(level)) then -- magic formula
         boardSize = boardSize + 1
     end
     bombAmount = boardSize - 1 + math.random(1, math.min(boardSize/2)) -- magic formula 2.0
