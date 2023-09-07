@@ -101,32 +101,33 @@ local function click(x, y, button)
             rank, file = math.floor(x/square), math.floor(y/square)
 
             if button == 1 and not index(flagSquares, rank, file) and not index(clickedSquares, rank, file) then
-                if #clickedSquares == 0 then
-                    setup()
-                elseif index(bombSquares, rank, file) then
+                if index(bombSquares, rank, file) then
                     sfx["boom"]:play()
                     gameOver = true
-                end
-                sfx["blip"]:play()
-                table.insert(clickedSquares, {rank, file})
+                else
+                    if #clickedSquares == 0 then
+                        setup()
+                    end
+                    sfx["blip"]:play()
+                    table.insert(clickedSquares, {rank, file})
 
-                if not index(numSquares, rank, file) then
-                    nilSquares = {{rank, file}}
-                    while #nilSquares ~= 0 do
-                        for i = -1, 1 do for j = -1, 1 do
-                            if (i ~= 0 or j ~= 0) and math.max(nilSquares[1][1] + i, nilSquares[1][2] + j) <= boardSize and math.min(nilSquares[1][1] + i, nilSquares[1][2] + j) > 0 then
-                                if not index(clickedSquares, nilSquares[1][1] + i, nilSquares[1][2] + j) and not index(flagSquares, nilSquares[1][1] + i, nilSquares[1][2] + j) and not index(numSquares, nilSquares[1][1] + i, nilSquares[1][2] + j) then
-                                    table.insert(nilSquares, {nilSquares[1][1] + i, nilSquares[1][2] + j})
+                    if not index(numSquares, rank, file) then
+                        nilSquares = {{rank, file}}
+                        while #nilSquares ~= 0 do
+                            for i = -1, 1 do for j = -1, 1 do
+                                if (i ~= 0 or j ~= 0) and math.max(nilSquares[1][1] + i, nilSquares[1][2] + j) <= boardSize and math.min(nilSquares[1][1] + i, nilSquares[1][2] + j) > 0 then
+                                    if not index(clickedSquares, nilSquares[1][1] + i, nilSquares[1][2] + j) and not index(flagSquares, nilSquares[1][1] + i, nilSquares[1][2] + j) and not index(numSquares, nilSquares[1][1] + i, nilSquares[1][2] + j) then
+                                        table.insert(nilSquares, {nilSquares[1][1] + i, nilSquares[1][2] + j})
+                                    end
+                                    if not index(clickedSquares, nilSquares[1][1] + i, nilSquares[1][2] + j) then
+                                        table.insert(clickedSquares, {nilSquares[1][1] + i, nilSquares[1][2] + j})
+                                    end
                                 end
-                                if not index(clickedSquares, nilSquares[1][1] + i, nilSquares[1][2] + j) then
-                                    table.insert(clickedSquares, {nilSquares[1][1] + i, nilSquares[1][2] + j})
-                                end
-                            end
-                        end end 
-                        table.remove(nilSquares, 1)
-                    end 
+                            end end 
+                            table.remove(nilSquares, 1)
+                        end 
+                    end
                 end
-
             elseif button == 2 and not index(clickedSquares, rank, file) then
                 duplicate = index(flagSquares, rank, file)
                 if duplicate then
