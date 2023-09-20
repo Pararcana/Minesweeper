@@ -78,7 +78,7 @@ local function drawBoard()
                 love.graphics.setColor(1,1,1)
                 local rgb = (x+y+1)%2==0 and {113, 235, 52} or {100, 200, 50}
                 love.graphics.setColor(love.math.colorFromBytes(rgb[1], rgb[2], rgb[3]))
-                love.graphics.rectangle("fill", (x*square), (y*square), square, square, 0.15*square, 0.15*square)
+                love.graphics.rectangle("fill", (x*square), (y*square), square, square)
             end
         end
     end
